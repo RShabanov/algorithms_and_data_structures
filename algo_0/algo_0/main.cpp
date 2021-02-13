@@ -151,12 +151,12 @@ void print_map(Map& map, Robot& robot) {
 	robot.draw_line({ rows - 1, cols - 1 },
 		Direction::down, Direction::right);
 
-	robot.rotate(Direction::top);
+	robot.rotate(Direction::left);
 
 	for (int i = 1; i < cols; i++) robot.move();
 
-	robot.rotate(Direction::left);
+	robot.rotate(Direction::top);
 
-	robot.draw_line({ rows - 1, 0 },
-		Direction::down, Direction::left, false);
+	robot.draw_line({ 0, cols - 1 },
+		Direction::right, Direction::top, false);
 }
