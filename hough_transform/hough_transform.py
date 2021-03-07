@@ -38,6 +38,17 @@ def hough_transform(data):
     return hough_space
 
 
-show_img(open_image_json("image_hough.json"))
-image = hough_transform(open_image_json("image_hough.json"))
-show_img(image)
+origin_image = open_image_json("image_hough.json")
+image = hough_transform(origin_image)
+
+figure = plt.figure(figsize=(6, 3))
+
+figure.add_subplot(1, 2, 1)
+plt.imshow(origin_image)
+plt.title("Origin image")
+
+figure.add_subplot(1, 2, 2)
+plt.imshow(image)
+plt.title("Hough space")
+
+plt.show()
