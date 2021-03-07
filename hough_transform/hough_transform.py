@@ -14,24 +14,27 @@ def open_image_json(path):
         return json.load(file)
 
 
-def calculate_p(hough_space, x, y):
+def calculate_p(hough_space, x, y, N_rows, N_cols):
     # x*cos(theta) + y*sin(theta) = p
+    # (x - N_cols / 2)*cos(theta) + (y - N_rows / 2)*sin(theta) = p ?
     d = len(hough_space) >> 1
     radian = pi / 180
     for degree in range(0, 181):
         angle = radian * degree
-        p = int(x * cos(angle) + y * sin(angle)) + d
+        # p = int(x * cos(angle) + y * sin(angle)) + d
+        p = int((x - N_cols / 2) * cos(angle) + (y - N_rows / 2) * sin(angle)) + d
         hough_space[degree][p] += 1
 
 
 def hough_transform(data):
-    d = int(sqrt(len(data) * len(data) + len(data[0]) + len(data[0])))
+    N_rows, N_cols = len(data), len(data[0])
+    d = int(sqrt(N_rows * N_rows + N_cols * N_cols)) >> 1
     hough_space = [[0 for j in range(-d, d + 1)] for i in range(0, 181)]
 
     for y in range(len(data)):
         for x in range(len(data[0])):
             if data[y][x]:
-                calculate_p(hough_space, x, y)
+                calculate_p(hough_space, x, y, N_rows, N_cols)
     return hough_space
 
 
