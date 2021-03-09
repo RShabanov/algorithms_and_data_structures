@@ -14,11 +14,12 @@ unsigned long long quick_pow(int, unsigned int);
 int main(int argc, char* argv[]) {
     if (argc > 1)      
         for (int i = 1; i < argc; i++) {
+            cout << "File: " << argv[i] << endl;
             cout << "Collision amount (" << argv[i] << ") using poly_hash:\t" 
                 << get_collision_amount(argv[i], poly_hash) << endl;
                 
             cout << "Collision amount (" << argv[i] << ") using ASCII_hash:\t" 
-                << get_collision_amount(argv[i], ASCII_hash) << endl;
+                << get_collision_amount(argv[i], ASCII_hash) << endl << endl;
         }
     
     else cerr << "Error! There mush be a file path" << endl;
