@@ -15,11 +15,12 @@ public:
     
 private:
     size_t PRN_id;
+    static const size_t PRN_id_size = 32;
     
     CA_code G1_generator();
     CA_code G2_generator();
     
-    pair<size_t, size_t> PRN_ids[32];
+    pair<size_t, size_t> PRN_ids[PRN_id_size];
 };
 
 
@@ -45,7 +46,12 @@ CAGenerator::CAGenerator(size_t _PRN_id) : PRN_ids {
     {3, 10}, {2, 3}, {3, 4}, {5, 6}, {6, 7}, {7, 8}, {8, 9}, {9, 10}, 
     {1, 4}, {2, 5}, {3, 6}, {4, 7}, {5, 8}, {6, 9}, {1, 3}, {4, 6}, 
     {5, 7}, {6, 8}, {7, 9}, {8, 10}, {1, 6}, {2, 7}, {3, 8}, {4, 9}
-}, PRN_id(_PRN_id) {}
+}, PRN_id(_PRN_id) {
+    if (PRN_id > PRN_id_size) {
+        cerr << "There are only 32 PRN ids!" << endl;
+        throw;
+    }
+}
 
 CAGenerator::CA_code CAGenerator::operator()() { return G1_generator() ^ G2_generator(); }
 
