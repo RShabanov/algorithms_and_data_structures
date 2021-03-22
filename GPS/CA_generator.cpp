@@ -12,13 +12,16 @@ public:
     ~CAGenerator() = default;
     
     CA_code operator()();
+
+    void set_satellite(size_t);
     
 private:
+    CA_code code;
     size_t PRN_id;
     static const size_t PRN_id_size = 32;
     
-    CA_code G1_generator();
-    CA_code G2_generator();
+    void G1_generator(CA_code&);
+    void G2_generator(CA_code&);
     
     pair<size_t, size_t> PRN_ids[PRN_id_size];
 };
@@ -53,42 +56,51 @@ CAGenerator::CAGenerator(size_t _PRN_id) : PRN_ids {
     }
 }
 
-CAGenerator::CA_code CAGenerator::operator()() { return G1_generator() ^ G2_generator(); }
-
-CAGenerator::CA_code CAGenerator::G1_generator() {
-    // G1 = 1 ^ x_3 ^ x_10
-    
-    CA_code code;
-    bitset<10> G1 { 0b1111111111 };
-    
-    size_t i = 0;
-    do {
-        bool G1_res = G1[7] ^ G1[0];
-        G1 >>= 1;
-        G1[9] = G1_res;
-        code[i++] = G1[0];
-    } while (G1 != 0b1111111111);
-    
+CAGenerator::CA_code CAGenerator::operator()() { 
+    G1_generator(code);
+    G2_generator(code);
     return code;
 }
 
-CAGenerator::CA_code CAGenerator::G2_generator() {
-    // G2 = 1 ^ x_2 ^ x_3 ^ x_6 ^ x_8 ^ x_9 ^  x_10
-    // Номер спутника пока что забит программно
-    // В bitset нумерация индексов идет <-:
-    //  9 8 7 6 5 4 3 2 1
-    //  0 0 1 0 1 1 0 1 1
-
-    CA_code code;
-    bitset<10> G2 { 0b1111111111 };
+void CAGenerator::G1_generator(CAGenerator::CA_code& code) {
+    // G1 = 1 ^ x_3 ^ x_10
     
-    size_t i = 0;
+    bitset<10> G1 { 0b1111111111 };
+    bitset<1> G1_res { 0 };
+    
+    size_t i = 1023;
     do {
-        bool G2_res = G2[8] ^ G2[7] ^ G2[4] ^ G2[2] ^ G2[1] ^ G2[0];
-        G2 >>= 1;
-        G2[9] = G2_res;
-        code[i++] = G2[PRN_ids[PRN_id].first - 1] ^ G2[PRN_ids[PRN_id].second - 1];
-    } while (G2 != 0b1111111111);
+        code[--i] = G1[0];
+        G1_res[0] = G1[7] ^ G1[0];
+        G1 >>= 1;
+        G1[9] = G1_res[0];
+    } while (G1 != 0b1111111111);
+}
+
+void CAGenerator::G2_generator(CAGenerator::CA_code& code) {
+    // G2 = 1 ^ x_2 ^ x_3 ^ x_6 ^ x_8 ^ x_9 ^  x_10
+
+    bitset<10> G2 { 0b1111111111 };
+    bitset<1> G2_res { 0 };
     
-    return code;
+    size_t i = 1023;
+    do {
+        i--;
+        code[i] = code[i] ^ G2[10 - PRN_ids[PRN_id].first] ^ G2[10 - PRN_ids[PRN_id].second];
+        G2_res[0] = G2[8] ^ G2[7] ^ G2[4] ^ G2[2] ^ G2[1] ^ G2[0];
+        G2 >>= 1;
+        G2[9] = G2_res[0];
+    } while (G2 != 0b1111111111);
+}
+
+void CAGenerator::set_satellite(size_t _PRN_id) {
+    if (PRN_id == _PRN_id) return;
+    if (_PRN_id > PRN_id_size) {
+        cerr << "There are only 32 PRN ids!" << endl;
+        throw;
+    }
+    else {
+        code.set();
+        PRN_id = _PRN_id;
+    }
 }
