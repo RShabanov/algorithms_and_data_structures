@@ -70,5 +70,13 @@ void CAGenerator::set_satellite(size_t _PRN_id) {
 
 
 bitset<nav_bit_length> generate_nav() {
-    return bitset<nav_bit_length>();
+    srand(time(NULL));
+    bitset<nav_bit_length> nav;
+    int loops = (nav_bit_length >> 3) / sizeof(RAND_MAX) - 1;
+    for (int i = 0; i < loops; i++) {
+        nav |= rand();
+        nav <<= (sizeof(RAND_MAX) << 3);
+    }
+    nav |= rand();
+    return nav;
 }

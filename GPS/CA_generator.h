@@ -7,6 +7,7 @@
 
 inline static constexpr size_t CA_bit_length = 1023;
 inline static constexpr size_t nav_bit_length = 128;
+inline static constexpr size_t rcode_bit_length = CA_bit_length + nav_bit_length;
 
 
 class CAGenerator {
