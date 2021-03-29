@@ -11,6 +11,8 @@ void task_1();
 void task_2();
 bitset<rcode_bit_length> receive_ca_code(const typename CAGenerator::CA_code&);
 
+void task_3();
+
 // just for generating codes
 void generate_received_codes();
 
@@ -32,8 +34,33 @@ void task_1() {
     cout << "CA code for satellite with PRN id (" << PRN_id << "): " << CA_generator() << endl;
 }
 
-
 void task_2() {
+    srand(time(NULL));
+    auto PRN_id = rand() % 32 + 1;
+
+    CAGenerator CA_generator(PRN_id);
+
+    ifstream in("./received_codes/" + to_string(PRN_id) + "_received.txt");
+    in.ignore(numeric_limits<streamsize>::max(),'\n');
+
+    bitset<rcode_bit_length << 1> temp;
+    in >> temp;
+
+    auto generated_ca = CA_generator();
+    for (size_t i = 0, j = 0; i < rcode_bit_length + nav_bit_length; i++, j = 0) {
+        for (; j < CA_bit_length; j++)
+            if (temp[i + j] != generated_ca[j]) break;
+
+        if (j == CA_bit_length) {
+            in.close();
+            cout << "Shift for " << PRN_id << " PRN: " << i + 1 << endl;
+            return;
+        }
+    }
+}
+
+void task_3() {
+    srand(time(NULL));
     auto PRN_id = rand() % 32 + 1;
 
     CAGenerator CA_generator(1);
@@ -47,8 +74,8 @@ void task_2() {
     for (size_t prn = 1; prn < 33; prn++) {
         CA_generator.set_satellite(prn);
         auto generated_ca = CA_generator();
-        for (size_t i = 0, j = 0; i < rcode_bit_length; i++, j = 0) {
-            for (; j < rcode_bit_length; j++)
+        for (size_t i = 0, j = 0; i < rcode_bit_length + nav_bit_length; i++, j = 0) {
+            for (; j < CA_bit_length; j++)
                 if (temp[i + j] != generated_ca[j]) break;
 
             if (j == CA_bit_length) {
