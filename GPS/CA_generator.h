@@ -25,7 +25,7 @@ private:
     CA_code code;
     size_t PRN_id : 7;
     bool was_generated : 1;
-    inline static const size_t PRN_id_size = 32;
+    inline static constexpr size_t PRN_id_size = 32;
 
     void G1_generator(CA_code&);
     void G2_generator(CA_code&);

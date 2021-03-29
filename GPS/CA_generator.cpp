@@ -6,7 +6,7 @@
 
 using namespace std;
 
-CAGenerator::CAGenerator(size_t _PRN_id) : PRN_id(_PRN_id), was_generated(false) {
+CAGenerator::CAGenerator(size_t _PRN_id) : PRN_id(_PRN_id - 1), was_generated(false) {
     if (PRN_id > PRN_id_size) {
         cerr << "There are only 32 PRN ids!" << endl;
         throw;
@@ -56,6 +56,7 @@ void CAGenerator::G2_generator(CAGenerator::CA_code& _code) {
 }
 
 void CAGenerator::set_satellite(size_t _PRN_id) {
+    _PRN_id--;
     if (PRN_id == _PRN_id) return;
     if (_PRN_id > PRN_id_size) {
         cerr << "There are only 32 PRN ids!" << endl;
