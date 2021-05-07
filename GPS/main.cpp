@@ -1,28 +1,46 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <ctime>
+#include <cmath>
+#include <iomanip>
+
 #include "CA_generator.h"
 
 using namespace std;
 
+struct Position {
+    float x, y;
+};
+
 
 void task_1();
 
+// Коррелятор
 void task_2();
 bitset<rcode_bit_length> receive_ca_code(const typename CAGenerator::CA_code&);
 
+// Нахождение PRN по входным данным
 void task_3();
+
+// Вычисление положения спутника по параметрам орбиты
+void task_4();
+
+// Триангуляция,  нахождение координат приемника по расстояниям до спутников
+void task_5();
 
 // just for generating codes
 void generate_received_codes();
 
 int main() {
-    task_2();
+    task_4();
     return 0;
 }
 
 
 void task_1() {
+    cout << "Task 1\n";
+
     size_t PRN_id;
     cout << "Enter PRN id: ";
     while (!(cin >> PRN_id)) {
@@ -35,6 +53,8 @@ void task_1() {
 }
 
 void task_2() {
+    cout << "Task 2\n";
+
     srand(time(NULL));
     auto PRN_id = rand() % 32 + 1;
 
@@ -60,12 +80,15 @@ void task_2() {
 }
 
 void task_3() {
+    cout << "Task 3\n";
+
     srand(time(NULL));
     auto PRN_id = rand() % 32 + 1;
 
     CAGenerator CA_generator(1);
 
-    ifstream in("./received_codes/" + to_string(PRN_id) + "_received.txt");
+    string path = "./received_codes/" + to_string(PRN_id) + "_received.txt";
+    ifstream in(path);
     in.ignore(numeric_limits<streamsize>::max(),'\n');
 
     bitset<rcode_bit_length << 1> temp;
@@ -80,7 +103,7 @@ void task_3() {
 
             if (j == CA_bit_length) {
                 in.close();
-                cout << "PRN: " << prn << endl;
+                cout << "For " << path << " PRN: " << prn << endl;
                 return;
             }
         }
@@ -88,10 +111,33 @@ void task_3() {
     in.close();
 }
 
+void task_4() {
+    cout << "Task 4\n";
+    srand(time(NULL));
+    Position orbit_centre { float(rand() % 100), float(rand() % 100) },
+            satellite_pos;
+    auto radius = rand() % 100, angular_v = rand() % 100, t = rand() % 100;
+
+    cout << "Input:\n" << left
+        << setw(25) << "orbit centre:" << "(" << orbit_centre.x << "; " << orbit_centre.y << ")\n"
+        << setw(25) << "radius:" << radius << endl
+        << setw(25) << "angular_velocity:" << angular_v << endl
+        << setw(25) << "time:" << t << endl << endl;
+
+    satellite_pos.x = orbit_centre.x + radius * sin(angular_v * t);
+    satellite_pos.y = orbit_centre.y + radius * cos(angular_v * t);
+
+    cout << "Output:\n"
+        << setw(25) << "satellite position:" << "(" << satellite_pos.x << "; " << satellite_pos.y << ")\n";
+}
+
+void task_5() {
+    cout << "Task 5\n";
+
+}
+
 
 bitset<rcode_bit_length> receive_ca_code(const typename CAGenerator::CA_code& ca_code) {
-    srand(time(NULL));
-
     bitset<rcode_bit_length> received_ca;
 
     for (size_t i = 0; i < CA_bit_length; i++)
@@ -100,15 +146,6 @@ bitset<rcode_bit_length> receive_ca_code(const typename CAGenerator::CA_code& ca
     auto nav = generate_nav();
     for (size_t i = 0; i < nav_bit_length; i++)
         received_ca[i] = nav[i];
-
-    bitset<rcode_bit_length << 1> buffer;
-    for (size_t i = 0; i < buffer.size(); i++)
-        buffer[i] = received_ca[i % rcode_bit_length];
-
-    size_t pos = rand() % rcode_bit_length;
-    for (size_t i = 0; i < rcode_bit_length; i++)
-        received_ca[i] = buffer[pos + i];
-
     return received_ca;
 }
 
@@ -132,7 +169,7 @@ void generate_received_codes() {
         cerr << "Something went wrong" << endl;
         return;
     }
-
+    size_t offset;
     ofstream out;
     for (int i = 1; i < 33; i++) {
         CA_generator.set_satellite(i);
@@ -140,8 +177,14 @@ void generate_received_codes() {
 
         out.open("./received_codes/" + to_string(i) + "_received.txt");
         out << N << endl;
-        for (int j = 0; j < N; j++)
+
+        offset = i + (rcode_bit_length % (nav_bit_length + i));
+        for (auto j = offset; j < received.size(); j++)
+            out << received[j];
+        for (int j = 0; j < N - 1; j++)
             out << received;
+        for (size_t i = 0; i < offset; i++)
+            out << received[i];
 
         out.close();
     }
