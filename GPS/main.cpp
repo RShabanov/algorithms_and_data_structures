@@ -9,8 +9,8 @@
 
 using namespace std;
 
-struct Position {
-    float x, y;
+struct Point {
+    float x, y, r;
 };
 
 
@@ -33,7 +33,12 @@ void task_5();
 void generate_received_codes();
 
 int main() {
-    task_4();
+//    generate_received_codes();
+    void (*tasks[])() {
+        task_1, task_2, task_3, task_4, task_5
+    };
+    for (const auto& task : tasks)
+        task();
     return 0;
 }
 
@@ -114,18 +119,18 @@ void task_3() {
 void task_4() {
     cout << "Task 4\n";
     srand(time(NULL));
-    Position orbit_centre { float(rand() % 100), float(rand() % 100) },
+    Point orbit_centre { float(rand() % 100), float(rand() % 100), float(rand() % 100) },
             satellite_pos;
-    auto radius = rand() % 100, angular_v = rand() % 100, t = rand() % 100;
+    auto angular_v = rand() % 100, t = rand() % 100;
 
     cout << "Input:\n" << left
         << setw(25) << "orbit centre:" << "(" << orbit_centre.x << "; " << orbit_centre.y << ")\n"
-        << setw(25) << "radius:" << radius << endl
+        << setw(25) << "radius:" << orbit_centre.r << endl
         << setw(25) << "angular_velocity:" << angular_v << endl
         << setw(25) << "time:" << t << endl << endl;
 
-    satellite_pos.x = orbit_centre.x + radius * sin(angular_v * t);
-    satellite_pos.y = orbit_centre.y + radius * cos(angular_v * t);
+    satellite_pos.x = orbit_centre.x + orbit_centre.r * sin(angular_v * t);
+    satellite_pos.y = orbit_centre.y + orbit_centre.r * cos(angular_v * t);
 
     cout << "Output:\n"
         << setw(25) << "satellite position:" << "(" << satellite_pos.x << "; " << satellite_pos.y << ")\n";
@@ -134,6 +139,31 @@ void task_4() {
 void task_5() {
     cout << "Task 5\n";
 
+    Point fst_set { 
+        float(rand() % 100), 
+        float(rand() % 100), 
+        float(rand() % 100)
+        }, snd_set { 
+        float(rand() % 100), 
+        float(rand() % 100), 
+        float(rand() % 100) 
+        }, trd_set { 
+        float(rand() % 100), 
+        float(rand() % 100), 
+        float(rand() % 100) 
+    };
+    
+    double x, y;
+    
+    x = ((snd_set.y - fst_set.y) * (snd_set.r * snd_set.r - trd_set.r * trd_set.r - snd_set.y * snd_set.y + trd_set.y * trd_set.y - snd_set.x * snd_set.x + trd_set.x * trd_set.x)
+            - (trd_set.y - snd_set.y) * (fst_set.r * fst_set.r - snd_set.r * snd_set.r - fst_set.y * fst_set.y + snd_set.y * snd_set.y - fst_set.x * fst_set.x + snd_set.x * snd_set.x))
+                    / (2 * ((trd_set.y - snd_set.y) * (fst_set.x - snd_set.x) - (snd_set.y - fst_set.y) * (snd_set.x - trd_set.x)));
+    y = ((snd_set.x - fst_set.x) * (snd_set.r * snd_set.r - trd_set.r * trd_set.r - snd_set.x * snd_set.x + trd_set.x * trd_set.x - snd_set.y * snd_set.y + trd_set.y * trd_set.y)
+            - (trd_set.x - snd_set.x) * (fst_set.r * fst_set.r - snd_set.r * snd_set.r - fst_set.x * fst_set.x + snd_set.x * snd_set.x - fst_set.y * fst_set.y + snd_set.y * snd_set.y))
+                    / (2 * ((trd_set.x - snd_set.x) * (fst_set.y - snd_set.y) - (snd_set.x - fst_set.x) * (snd_set.y - trd_set.y)));
+
+    cout << "Receiver position: "
+        << "(" << x << "; " << y << ")\n";
 }
 
 
