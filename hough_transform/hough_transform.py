@@ -17,7 +17,7 @@ def open_image_json(path):
 def circle_hough_transform(data):
     N_rows, N_cols = len(data), len(data[0])
     max_radius =  (N_cols >> 1) if N_rows > N_cols else (N_rows >> 1)
-    print(N_rows, N_cols, max_radius)
+
     # (x - a)^2 + (y - b)^2 = r^2
     circle_space = [[[0 for i in range(max_radius + 1)] for j in range(N_cols)] for k in range(N_rows)]
     for row in range(N_rows):
@@ -100,9 +100,6 @@ def hough_transform_sl(data):
     a_axis["min"] = -a_axis["min"]
     b_axis["min"] = -b_axis["min"]
 
-    print(a_axis)
-    print(b_axis)
-
     N_rows, N_cols = int(sum(a_axis.values())), int(b_axis["max"])
 
     map = [[0 for j in range(N_cols + 1)] for i in range(N_rows + 1)]
@@ -118,30 +115,45 @@ def hough_transform_sl(data):
     return map
 
 
-origin_image = open_image_json("image_cirlces.json")
-image = circle_hough_transform(origin_image)
-circle_img = []
+def get_max_point(space):
+    max_value = 0
+    point = (0, 0, 0)
 
-for row in image:
-    arr = []
-    for col in row:
-        arr.append(sum(col))
-    circle_img.append(arr)
+    for x in range(len(space)):
+        for y in range(len(space[x])):
+            for z in range(len(space[x][y])):
+                if max_value < space[x][y][z]:
+                    max_value = space[x][y][z]
+                    point = (x, y, z)
+    return point
 
 
-show_img(origin_image)
-show_img(circle_img)
+def circle_task():
+    origin_image = open_image_json("image_cirlces.json")
+    image = circle_hough_transform(origin_image)
 
-# image = hough_transform(origin_image)
-#
-# figure = plt.figure(figsize=(6, 3))
-#
-# figure.add_subplot(1, 2, 1)
-# plt.imshow(origin_image)
-# plt.title("Origin image")
-#
-# figure.add_subplot(1, 2, 2)
-# plt.imshow(image)
-# plt.title("Hough space")
-#
-# plt.show()
+    print("Circle_task")
+    print("Max value in 3d space:", get_max_point(image))
+
+
+def line_task():
+    origin_image = open_image_json("image_hough.json")
+    image = hough_transform(origin_image)
+
+    figure = plt.figure(figsize=(6, 3))
+
+    figure.add_subplot(1, 2, 1)
+    plt.imshow(origin_image)
+    plt.title("Origin image")
+
+    figure.add_subplot(1, 2, 2)
+    plt.imshow(image)
+    plt.title("Hough space")
+
+    plt.show()
+
+
+line_task()
+circle_task()
+
+
