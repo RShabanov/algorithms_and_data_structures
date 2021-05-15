@@ -4,12 +4,11 @@ project(trees)
 set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCES
-        main.cpp
+        main.cpp)
+
+set(SIMPLE_TREE
+        simple_tree/Node.h
+        simple_tree/SimpleTree.h
         )
 
-set(HEADERS
-        Node.h
-        SimpleTree.h)
-
-
-add_executable(trees ${SOURCES} ${HEADERS})
+add_executable(trees ${SOURCES} ${SIMPLE_TREE})

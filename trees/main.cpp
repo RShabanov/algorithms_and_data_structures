@@ -1,7 +1,7 @@
 #include <iostream>
 #include <ctime>
 
-#include "SimpleTree.h"
+#include "simple_tree/SimpleTree.h"
 using namespace std;
 
 int main() {
