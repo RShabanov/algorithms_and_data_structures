@@ -17,23 +17,26 @@ class SimpleTree {
 
 protected:
     Node<data_type>* root;
-    Node<data_type>* remove_node(Node<data_type>*, data_type);
+    virtual Node<data_type>* remove_node(Node<data_type>*, data_type);
+    virtual void insert_node(Node<data_type>* parent, Node<data_type>* new_node);
 
 public:
     SimpleTree();
     explicit SimpleTree(data_type);
     explicit SimpleTree(Node<data_type>*);
-    ~SimpleTree();
+    virtual ~SimpleTree();
 
-    void insert(data_type);
-    void insert(Node<data_type>*);
+    virtual void insert(data_type);
+    virtual void insert(Node<data_type>*);
 
     bool seek(data_type) const;
 
-    void remove(data_type);
+    virtual void remove(data_type);
 
     data_type min() const;
     data_type max() const;
+
+    int height() const;
 
     template<typename output_type> friend std::ostream& operator<<(std::ostream&, const SimpleTree<output_type>&);
 };
@@ -49,7 +52,7 @@ SimpleTree<data_type>::SimpleTree(data_type data) {
 
 template<typename data_type>
 SimpleTree<data_type>::SimpleTree(Node<data_type>* node)
-        : root(node) { node = nullptr; }
+        : root(node) {}
 
 template<typename data_type>
 SimpleTree<data_type>::~SimpleTree() {
@@ -64,30 +67,30 @@ void SimpleTree<data_type>::insert(data_type data) {
 
 template<typename data_type>
 void SimpleTree<data_type>::insert(Node<data_type>* new_node) {
-    if (root == nullptr) {
-        root = new_node;
-        new_node = nullptr;
-        return;
+    if (new_node == nullptr) return;
+
+    if (root == nullptr) root = new_node;
+    else insert_node(root, new_node);
+}
+
+template<typename data_type>
+void SimpleTree<data_type>::insert_node(Node<data_type>* parent,
+                                        Node<data_type>* new_node) {
+    if (new_node->data < parent->data) {
+        if (parent->left == nullptr)
+            parent->left = new_node;
+        else insert_node(parent->left, new_node);
+    }
+    else {
+        if (parent->right == nullptr)
+            parent->right = new_node;
+        else insert_node(parent->right, new_node);
     }
 
-    Node<data_type>* current = root;
-    while (true) {
-        if (new_node->data < current->data) {
-            if (current->left == nullptr) {
-                current->left = new_node;
-                break;
-            }
-            current = current->left;
-        }
-        else {
-            if (current->right == nullptr) {
-                current->right = new_node;
-                break;
-            }
-            current = current->right;
-        }
-    }
-    new_node = nullptr;
+    auto l_height = parent->left != nullptr ? parent->left->height : 0;
+    auto r_height = parent->right != nullptr ? parent->right->height : 0;
+
+    parent->height = 1 + (l_height < r_height ? r_height : l_height);
 }
 
 template<typename data_type>
@@ -181,6 +184,11 @@ void SimpleTree<data_type>::print_tree(const Node<data_type>* node, std::ostream
     if (node->left != nullptr) print_tree(node->left, out);
     out << node->data << " ";
     if (node->right != nullptr) print_tree(node->right, out);
+}
+
+template<typename data_type>
+int SimpleTree<data_type>::height() const {
+    return root->height;
 }
 
 

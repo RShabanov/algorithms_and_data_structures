@@ -5,10 +5,11 @@
 template<typename data_type>
 struct Node {
     data_type data;
+    int height;
     Node<data_type>* left = nullptr, *right = nullptr;
 
     Node() = default;
-    explicit Node(data_type _data) : data(_data) {}
+    explicit Node(data_type _data) : data(_data), height(1) {}
 };
 
 

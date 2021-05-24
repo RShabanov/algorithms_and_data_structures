@@ -6,9 +6,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(SOURCES
         main.cpp)
 
-set(SIMPLE_TREE
-        simple_tree/Node.h
-        simple_tree/SimpleTree.h
-        )
+set(HEADERS
+        Node.h
+        SimpleTree.h
+        AVLTree.h)
 
-add_executable(trees ${SOURCES} ${SIMPLE_TREE})
+add_executable(trees ${SOURCES} ${HEADERS})
