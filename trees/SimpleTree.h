@@ -3,18 +3,27 @@
 
 #include "Node.h"
 
+#include<iostream>
+
 
 template<typename data_type>
 class SimpleTree {
-    Node<data_type>* root;
-
-    Node<data_type>* remove_node(Node<data_type>*, data_type);
     data_type find_min(Node<data_type>*) const;
     data_type find_max(Node<data_type>*) const;
+
+    void delete_children(Node<data_type>*);
+
+    void print_tree(const Node<data_type>*, std::ostream&) const;
+
+protected:
+    Node<data_type>* root;
+    Node<data_type>* remove_node(Node<data_type>*, data_type);
+
 public:
     SimpleTree();
     explicit SimpleTree(data_type);
     explicit SimpleTree(Node<data_type>*);
+    ~SimpleTree();
 
     void insert(data_type);
     void insert(Node<data_type>*);
@@ -25,6 +34,8 @@ public:
 
     data_type min() const;
     data_type max() const;
+
+    template<typename output_type> friend std::ostream& operator<<(std::ostream&, const SimpleTree<output_type>&);
 };
 
 template<typename data_type>
@@ -38,7 +49,12 @@ SimpleTree<data_type>::SimpleTree(data_type data) {
 
 template<typename data_type>
 SimpleTree<data_type>::SimpleTree(Node<data_type>* node)
-        : root(node){}
+        : root(node) { node = nullptr; }
+
+template<typename data_type>
+SimpleTree<data_type>::~SimpleTree() {
+    delete_children(root);
+}
 
 template<typename data_type>
 void SimpleTree<data_type>::insert(data_type data) {
@@ -50,6 +66,7 @@ template<typename data_type>
 void SimpleTree<data_type>::insert(Node<data_type>* new_node) {
     if (root == nullptr) {
         root = new_node;
+        new_node = nullptr;
         return;
     }
 
@@ -70,6 +87,7 @@ void SimpleTree<data_type>::insert(Node<data_type>* new_node) {
             current = current->right;
         }
     }
+    new_node = nullptr;
 }
 
 template<typename data_type>
@@ -139,6 +157,30 @@ data_type SimpleTree<data_type>::min() const {
 template<typename data_type>
 data_type SimpleTree<data_type>::max() const {
     return find_max(root);
+}
+
+template<typename data_type>
+void SimpleTree<data_type>::delete_children(Node<data_type>* node) {
+    if (node == nullptr) return;
+
+    if (node->left != nullptr) delete_children(node->left);
+    if (node->right != nullptr) delete_children(node->right);
+    delete node;
+}
+
+template<typename output_type>
+std::ostream& operator<<(std::ostream& out, const SimpleTree<output_type>& tree) {
+    tree.print_tree(tree.root, out);
+    return out;
+}
+
+template<typename data_type>
+void SimpleTree<data_type>::print_tree(const Node<data_type>* node, std::ostream& out) const {
+    if (node == nullptr) return;
+
+    if (node->left != nullptr) print_tree(node->left, out);
+    out << node->data << " ";
+    if (node->right != nullptr) print_tree(node->right, out);
 }
 
 
