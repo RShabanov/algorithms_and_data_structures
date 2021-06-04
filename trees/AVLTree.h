@@ -17,18 +17,28 @@ class AVLTree : public SimpleTree<data_type> {
     Node<data_type>* big_left_rotation(Node<data_type>* root_node,
                            Node<data_type>* parent) const;
 
+    int get_child_height(Node<data_type>*) const;
+    int get_node_height(Node<data_type>*) const;
+
+    void search_to_remove(Node<data_type>* root_node,
+                          Node<data_type>* parent,
+                          Node<data_type>* remove_node);
+
+    void remove_leaf(Node<data_type>* leaf,
+                     Node<data_type>* node);
+
+    bool has_one_child(Node<data_type>* node);
+
+protected:
     virtual void insert_node(Node<data_type>* root_node,
                              Node<data_type>* parent,
                              Node<data_type>* new_node);
 
     virtual void remove_node(Node<data_type>* root_node,
                              Node<data_type>* parent,
-                             Node<data_type>* new_node);
+                             data_type remove_node);
 
-    int get_child_height(Node<data_type>*) const;
-    int get_node_height(Node<data_type>*) const;
-
-    void balance(Node<data_type>* root_node,
+    virtual void balance(Node<data_type>* root_node,
                  Node<data_type>* parent);
 public:
     AVLTree();
@@ -131,6 +141,8 @@ template<typename data_type>
 void AVLTree<data_type>::insert_node(Node<data_type>* root_node,
                                      Node<data_type>* parent,
                                      Node<data_type>* new_node) {
+    if (new_node->data == root_node->data) return;
+
     if (new_node->data < root_node->data) {
         if (root_node->left == nullptr)
             root_node->left = new_node;
@@ -193,15 +205,97 @@ void AVLTree<data_type>::balance(Node<data_type>* root_node,
 
 template<typename data_type>
 void AVLTree<data_type>::remove(data_type data) {
-    remove_node(SimpleTree<data_type>::root, nullptr, data);
+//    Node<data_type>* target = SimpleTree<data_type>::seek(data);
+//    if (target == nullptr) return;
+
+    remove_node(SimpleTree<data_type>::root,
+                nullptr, data);
 }
 
 template<typename data_type>
-void AVLTree<data_type>::remove_node(Node<data_type> *root_node,
-                                     Node<data_type> *parent,
-                                     Node<data_type> *new_node) {
-    // will finish later
-    // I have a headache :)
+void AVLTree<data_type>::remove_node(Node<data_type>* root_node,
+                                     Node<data_type>* parent,
+                                     data_type remove_data) {
+    if (root_node->data != remove_data) {
+        if (remove_data < root_node->data) {
+            if (root_node->left == nullptr) return;
+            remove_node(root_node->left, root_node, remove_data);
+        }
+        else {
+            if (root_node->right == nullptr) return;
+            remove_node(root_node->right, root_node, remove_data);
+        }
+        balance(root_node, parent);
+    }
+    else {
+        if (SimpleTree<data_type>::is_leaf(root_node)) {
+            remove_leaf(root_node, parent);
+            return;
+        }
+
+        // root has only one child
+        if (has_one_child(root_node)) {
+            bool is_left_root = (parent->left == root_node ? true : false);
+
+            if (root_node->left != nullptr && root_node->right == nullptr) {
+                if (is_left_root)
+                    parent->left = root_node->left;
+                else parent->right = root_node->left;
+            }
+            else {
+                if (is_left_root)
+                    parent->left = root_node->right;
+                else parent->right = root_node->right;
+            }
+
+            delete root_node;
+            return;
+        }
+        // 2 children
+        else
+            search_to_remove(root_node->right, parent, root_node);
+
+    }
+}
+
+template<typename data_type>
+void AVLTree<data_type>::search_to_remove(Node<data_type>* root_node,
+                                          Node<data_type>* parent,
+                                          Node<data_type>* remove_node) {
+
+    if (root_node->left != nullptr) {
+        search_to_remove(root_node->left, root_node, remove_node);
+        balance(root_node, parent);
+    }
+    else {
+        remove_node->data = root_node->data;
+
+        if (parent->left == root_node)
+            parent->left = nullptr;
+        else parent->right = nullptr;
+
+        delete root_node;
+    }
+}
+
+template<typename data_type>
+void AVLTree<data_type>::remove_leaf(Node<data_type>* leaf,
+                                     Node<data_type>* node) {
+    if (node->left == leaf)
+        node->left = nullptr;
+    else if (node->right == leaf)
+        node->right = nullptr;
+
+    if (leaf != nullptr) delete leaf;
+}
+
+template<typename data_type>
+bool AVLTree<data_type>::has_one_child(Node<data_type>* node) {
+    if (node != nullptr) {
+        return (node->left != nullptr && node->right == nullptr ||
+            node->right != nullptr && node->left == nullptr);
+    }
+    return false;
 }
 
 

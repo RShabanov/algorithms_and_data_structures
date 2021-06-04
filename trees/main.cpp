@@ -46,5 +46,13 @@ void test_avl_tree() {
         cout << value << " ";
     }
     cout << "\nTree: " << tree << endl;
+    cout << "Tree height: " << tree.height() << endl;
     cout << "\nIs " << value << " in tree: " << std::boolalpha << tree.seek(value) << endl;
+
+    value = tree.get_root();
+    tree.remove(value);
+
+    cout << "Tree after removing " << value << ": " << tree << endl;
+    cout << "Tree height: " << tree.height() << endl;
+
 }

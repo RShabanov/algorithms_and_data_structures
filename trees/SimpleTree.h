@@ -8,9 +8,6 @@
 
 template<typename data_type>
 class SimpleTree {
-    data_type find_min(Node<data_type>*) const;
-    data_type find_max(Node<data_type>*) const;
-
     void delete_children(Node<data_type>*);
 
     void print_tree(const Node<data_type>*, std::ostream&) const;
@@ -19,6 +16,13 @@ protected:
     Node<data_type>* root;
     virtual Node<data_type>* remove_node(Node<data_type>*, data_type);
     virtual void insert_node(Node<data_type>* parent, Node<data_type>* new_node);
+
+    Node<data_type>* find_min(Node<data_type>*) const;
+    Node<data_type>* find_max(Node<data_type>*) const;
+
+    Node<data_type>* find_node(data_type);
+
+    bool is_leaf(Node<data_type>*) const;
 
 public:
     SimpleTree();
@@ -29,12 +33,13 @@ public:
     virtual void insert(data_type);
     virtual void insert(Node<data_type>*);
 
-    bool seek(data_type) const;
+    bool seek(data_type);
 
     virtual void remove(data_type);
 
     data_type min() const;
     data_type max() const;
+    data_type get_root() const;
 
     int height() const;
 
@@ -76,6 +81,8 @@ void SimpleTree<data_type>::insert(Node<data_type>* new_node) {
 template<typename data_type>
 void SimpleTree<data_type>::insert_node(Node<data_type>* parent,
                                         Node<data_type>* new_node) {
+    if (new_node->data == parent->data) return;
+
     if (new_node->data < parent->data) {
         if (parent->left == nullptr)
             parent->left = new_node;
@@ -94,17 +101,8 @@ void SimpleTree<data_type>::insert_node(Node<data_type>* parent,
 }
 
 template<typename data_type>
-bool SimpleTree<data_type>::seek(data_type data) const {
-    Node<data_type>* current = root;
-    while (current != nullptr) {
-        if (current->data == data)
-            return true;
-
-        if (data < current->data)
-            current = current->left;
-        else current = current->right;
-    }
-    return false;
+bool SimpleTree<data_type>::seek(data_type data) {
+    return nullptr != find_node(data);
 }
 
 template<typename data_type>
@@ -121,7 +119,7 @@ Node<data_type>* SimpleTree<data_type>::remove_node(Node<data_type>* node, data_
     else if (data > node->data)
         node->right = remove_node(node->right, data);
     else if (node->left != nullptr && node->right != nullptr) {
-        node->data = find_min(node->right);
+        node->data = find_min(node->right)->data;
         node->right = remove_node(node->right, node->data);
     }
     else {
@@ -137,29 +135,33 @@ Node<data_type>* SimpleTree<data_type>::remove_node(Node<data_type>* node, data_
 }
 
 template<typename data_type>
-data_type SimpleTree<data_type>::find_min(Node<data_type>* node) const {
+Node<data_type>* SimpleTree<data_type>::find_min(Node<data_type>* node) const {
     auto current = node;
     while (current->left != nullptr)
         current = current->left;
-    return current->data;
+    return current;
 }
 
 template<typename data_type>
-data_type SimpleTree<data_type>::find_max(Node<data_type>* node) const {
+Node<data_type>* SimpleTree<data_type>::find_max(Node<data_type>* node) const {
     auto current = node;
     while (current->right != nullptr)
         current = current->right;
-    return current->data;
+    return current;
 }
 
 template<typename data_type>
 data_type SimpleTree<data_type>::min() const {
-    return find_min(root);
+    if (root == nullptr)
+        throw;
+    return find_min(root)->data;
 }
 
 template<typename data_type>
 data_type SimpleTree<data_type>::max() const {
-    return find_max(root);
+    if (root == nullptr)
+        throw;
+    return find_max(root)->data;
 }
 
 template<typename data_type>
@@ -189,6 +191,30 @@ void SimpleTree<data_type>::print_tree(const Node<data_type>* node, std::ostream
 template<typename data_type>
 int SimpleTree<data_type>::height() const {
     return root->height;
+}
+
+template<typename data_type>
+Node<data_type>* SimpleTree<data_type>::find_node(data_type data) {
+    Node<data_type>* current = root;
+    while (current != nullptr) {
+        if (current->data == data)
+            return current;
+
+        if (data < current->data)
+            current = current->left;
+        else current = current->right;
+    }
+    return nullptr;
+}
+
+template<typename data_type>
+bool SimpleTree<data_type>::is_leaf(Node<data_type>* node) const {
+    return node->left == nullptr && node->right == nullptr;
+}
+
+template<typename data_type>
+data_type SimpleTree<data_type>::get_root() const {
+    return root->data;
 }
 
 
